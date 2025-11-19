@@ -18,14 +18,34 @@ public class Dungeon
     private const int minRooms = 7;
     private readonly int firstRoom = 35;
 
+    // Optional deterministic generation
+    private bool useSeed = false;
+    private int seed = 0;
+    public bool UseSeed { get => useSeed; set => useSeed = value; }
+    public int Seed { get => seed; set => seed = value; }
+
     public Dungeon()
     {
+        GenerateDungeon();
+    }
+
+    // Construct with an explicit seed for deterministic generation
+    public Dungeon(int seed)
+    {
+        this.useSeed = true;
+        this.seed = seed;
         GenerateDungeon();
     }
 
     #region Procedural Dungeon
     private void GenerateDungeon()
     {
+        // If deterministic seed is requested, initialize RNG
+        if (useSeed)
+        {
+            Random.InitState(seed);
+        }
+
         roomCount = 0;
         roomQueue = new Queue<int>();
         endRooms = new Queue<int>();

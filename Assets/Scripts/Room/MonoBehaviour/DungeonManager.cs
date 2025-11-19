@@ -11,6 +11,9 @@ public class DungeonManager : Singleton<DungeonManager>
     public Dungeon Dungeon { get => dungeon; }
     public Transform DungeonHolder { get => _dungeonHolder; }
     public bool Shifting { get => _shifting; }
+    // Optional deterministic dungeon seed for reproducible generation
+    public bool useSeed = false;
+    public int seed = 0;
     public GameObject mapRoom;
     private GameObject[] _minimapRooms;
 
@@ -61,8 +64,16 @@ public class DungeonManager : Singleton<DungeonManager>
         Doorway.ShiftRoomEvent += PlayerCollideDoorwayEventHandler;
         Switch.SwitchPressed += SwitchPressedEventHandler;
 
-        dungeon = new Dungeon();
-        
+        if (useSeed)
+        {
+            Debug.LogFormat("Generating dungeon with seed={0}", seed);
+            dungeon = new Dungeon(seed);
+        }
+        else
+        {
+            dungeon = new Dungeon();
+        }
+
         //disable for now the minimap
         if (miniMap.activeSelf)
         {
@@ -114,7 +125,66 @@ public class DungeonManager : Singleton<DungeonManager>
                 doorCenter = new Vector2(doorwayPosX + Const.UnitSize, _playerTransform.position.y);
                 _offsetY = -Const.ScreenHeight;
                 break;
-            case Position.RIGHT:
+                // Allow overriding seed from command-line, environment or editor prefs for training runs
+                // Priority: explicit inspector `useSeed` set by user > command-line/env > EditorPrefs
+                // Check command-line args for -dungeonSeed=123 or -seed=123
+                try
+                {
+                    string[] cmdArgs = System.Environment.GetCommandLineArgs();
+                    foreach (var a in cmdArgs)
+                    {
+                        if (a.StartsWith("-dungeonSeed=") || a.StartsWith("-seed="))
+                        {
+                            var parts = a.Split('=');
+                            if (parts.Length == 2 && int.TryParse(parts[1], out int parsed))
+                            {
+                                useSeed = true;
+                                seed = parsed;
+                                Debug.LogFormat("[DungeonManager] Seed set from command-line: {0}", seed);
+                                break;
+                            }
+                        }
+                    }
+
+                    // If not found in args, check environment variable
+                    if (!useSeed)
+                    {
+                        var env = System.Environment.GetEnvironmentVariable("DUNGEON_SEED");
+                        if (!string.IsNullOrEmpty(env) && int.TryParse(env, out int parsedEnv))
+                        {
+                            useSeed = true;
+                            seed = parsedEnv;
+                            Debug.LogFormat("[DungeonManager] Seed set from environment: {0}", seed);
+                        }
+                    }
+
+#if UNITY_EDITOR
+                    // EditorPrefs allow CI/editor automation to set the seed beforehand
+                    if (!useSeed)
+                    {
+                        if (UnityEditor.EditorPrefs.HasKey("TrainingDungeonUseSeed") && UnityEditor.EditorPrefs.GetBool("TrainingDungeonUseSeed"))
+                        {
+                            useSeed = true;
+                            seed = UnityEditor.EditorPrefs.GetInt("TrainingDungeonSeed", seed);
+                            Debug.LogFormat("[DungeonManager] Seed set from EditorPrefs: {0}", seed);
+                        }
+                    }
+#endif
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogWarningFormat("[DungeonManager] Error parsing seed from args/env: {0}", ex.Message);
+                }
+
+                if (useSeed)
+                {
+                    Debug.LogFormat("Generating dungeon with seed={0}", seed);
+                    dungeon = new Dungeon(seed);
+                }
+                else
+                {
+                    dungeon = new Dungeon();
+                }
                 doorCenter = new Vector2(_playerTransform.position.x, doorwayPosY + Const.UnitSize);
                 _offsetX = Const.ScreenWitdth;
                 break;
@@ -202,7 +272,7 @@ public class DungeonManager : Singleton<DungeonManager>
         {
             float step = _cameraSpeed * Time.deltaTime;
             _mainCamera.position = Vector3.MoveTowards(_mainCamera.position, target, step);
-            _playerTransform.position = Vector3.MoveTowards(_playerTransform.position, playerTarget,  playerVelocity * Time.deltaTime);
+            _playerTransform.position = Vector3.MoveTowards(_playerTransform.position, playerTarget, playerVelocity * Time.deltaTime);
             yield return null;
         }
     }
@@ -262,7 +332,7 @@ public class DungeonManager : Singleton<DungeonManager>
 
         int[] roomsGrid = dungeon.RoomsGrid;
 
-        for (int i = roomsGrid.Length -1; i >= 0; i--)
+        for (int i = roomsGrid.Length - 1; i >= 0; i--)
         {
             if (roomsGrid[i] == 0) continue;
 
