@@ -1,11 +1,24 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+
 /// <summary>
 /// Top-down movement controller that uses a Kinematic Rigidbody2D.
 /// Multiple iterations of a query are used with movement clamping that allows "sliding" along surfaces.
 /// </summary>
-public class KinematicTopDownController : MonoBehaviour
+
+// Local definition of ICharacterController to ensure compile-time availability.
+// Kept here to avoid assembly/compile-order issues in the project. This matches the
+// separate interface used by states and adapters.
+public interface ICharacterController
+{
+    void MoveTo(Vector2 worldTarget);
+    void SetVelocity(Vector2 velocity);
+    void Stop();
+    bool IsMoving { get; }
+}
+
+public class KinematicTopDownController : MonoBehaviour, ICharacterController
 {
 
     // A small offset (standoff) from colliders to ensure we don't try to get too close.
@@ -24,6 +37,12 @@ public class KinematicTopDownController : MonoBehaviour
     private Rigidbody2D m_Rigidbody;
     public Vector2 m_Movement;
     private List<RaycastHit2D> m_MovementHits = new List<RaycastHit2D>(1);
+
+    // Default speed used for ICharacterController.MoveTo when caller doesn't provide a speed.
+    public float m_DefaultSpeed = 3f;
+
+    // Internal movement state used by ICharacterController.SetVelocity/Stop/IsMoving
+    private Vector2 m_InternalVelocity = Vector2.zero;
 
 
     private void Awake()
@@ -53,7 +72,7 @@ public class KinematicTopDownController : MonoBehaviour
         var startPosition = m_Rigidbody.position;
 
         // Iterate up to a capped iteration limit or until we have no distance to move or we've clamped the direction of motion to zero.
-        while(
+        while (
             maxIterations-- > 0 &&
             distanceRemaining > Epsilon &&
             movementDirection.sqrMagnitude > Epsilon
@@ -91,7 +110,7 @@ public class KinematicTopDownController : MonoBehaviour
 
                 // Clamp the movement direction.
                 // NOTE: This is effectively how we iterate and change direction for the queries.
-                movementDirection -=  hit.normal * Vector2.Dot(movementDirection, hit.normal);
+                movementDirection -= hit.normal * Vector2.Dot(movementDirection, hit.normal);
             }
             else
             {
@@ -101,7 +120,8 @@ public class KinematicTopDownController : MonoBehaviour
 
             // Remove the distance we ended up moving from the remaining.
             distanceRemaining -= distance;
-        };
+        }
+        ;
 
         // Reset the Rigidbody2D position due to changes during querying.
         // NOTE: We can avoid this setting of the Rigidbody2D position by a different choice of query.
@@ -140,5 +160,47 @@ public class KinematicTopDownController : MonoBehaviour
         // NOTE: We could also ensure we move out of overlap by the contact offset here.
         if (colliderDistance.isOverlapped)
             collision.otherRigidbody.position += colliderDistance.normal * colliderDistance.distance;
+    }
+
+    // Small epsilon reused by interface helper methods
+    private const float k_Epsilon = 0.005f;
+
+    // ICharacterController implementation
+    public void MoveTo(Vector2 worldTarget)
+    {
+        if (m_Rigidbody == null)
+            return;
+
+        var movement = worldTarget - m_Rigidbody.position;
+        if (movement.sqrMagnitude <= k_Epsilon)
+            return;
+
+        // Use default speed when caller doesn't provide one
+        MovePosition(movement, m_DefaultSpeed);
+        m_InternalVelocity = movement.normalized * m_DefaultSpeed;
+    }
+
+    public void SetVelocity(Vector2 velocity)
+    {
+        if (velocity.sqrMagnitude <= k_Epsilon)
+        {
+            m_InternalVelocity = Vector2.zero;
+            return;
+        }
+
+        // Interpret velocity as world-units-per-second
+        MovePosition(velocity, velocity.magnitude);
+        m_InternalVelocity = velocity;
+    }
+
+    public void Stop()
+    {
+        m_InternalVelocity = Vector2.zero;
+        // no-op movement
+    }
+
+    public bool IsMoving
+    {
+        get { return m_InternalVelocity.sqrMagnitude > k_Epsilon; }
     }
 }

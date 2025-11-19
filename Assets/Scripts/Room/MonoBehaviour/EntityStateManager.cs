@@ -6,9 +6,11 @@ public abstract class EntityStateManager : MonoBehaviour
     protected Rigidbody2D _rigidbody2d;
     protected Collider2D _collider;
     protected KinematicTopDownController _kinematicController;
+    protected ICharacterController _characterController;
     [HideInInspector] public Rigidbody2D Rigidbody2d { get { return _rigidbody2d; } }
     [HideInInspector] public Collider2D Collider { get { return _collider; } }
     [HideInInspector] public KinematicTopDownController KinematicController { get => _kinematicController; }
+    [HideInInspector] public ICharacterController CharacterController { get => _characterController; }
 
     // Animator
     protected Animator _animator;
@@ -31,6 +33,35 @@ public abstract class EntityStateManager : MonoBehaviour
         _collider = GetComponent<Collider2D>();
         _animator = GetComponent<Animator>();
         _kinematicController = GetComponent<KinematicTopDownController>();
+        _characterController = GetComponent<ICharacterController>();
+        // Note: wrapper methods below allow states to request movement without depending on concrete controller API.
+    }
+
+    // Wrapper to move the underlying kinematic controller and return whether it bumped into an obstacle.
+    public bool MoveController(Vector2 movement, float speed)
+    {
+        if (_kinematicController == null)
+            return false;
+
+        return _kinematicController.MovePosition(movement, speed);
+    }
+
+    // Wrapper to set direct velocity on the underlying controller.
+    public void SetControllerVelocity(Vector2 velocity)
+    {
+        if (_kinematicController == null)
+            return;
+
+        _kinematicController.SetVelocity(velocity);
+    }
+
+    // Wrapper to stop the underlying controller.
+    public void StopController()
+    {
+        if (_kinematicController == null)
+            return;
+
+        _kinematicController.Stop();
     }
 
     protected virtual void Update()

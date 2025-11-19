@@ -56,7 +56,16 @@ public class EnemyWalkState : EnemyBaseState
     public override void FixedUpdate()
     {
         UpdateAnimation();
-        _bumped = enemy.KinematicController.MovePosition(enemy.Direction, enemy.WalkSpeed);
+        // Prefer ICharacterController if available so states depend on the interface
+        if (enemy.CharacterController != null)
+        {
+            _bumped = enemy.CharacterController.MovePosition(enemy.Direction, enemy.WalkSpeed);
+        }
+        else
+        {
+            // Fallback to existing wrapper which calls the concrete controller
+            _bumped = enemy.MoveController(enemy.Direction, enemy.WalkSpeed);
+        }
     }
 
     private void UpdateAnimation()

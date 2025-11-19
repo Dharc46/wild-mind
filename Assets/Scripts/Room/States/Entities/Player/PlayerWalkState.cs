@@ -46,6 +46,14 @@ public class PlayerWalkState : PlayerBaseState
 
     public override void FixedUpdate()
     {
-        player.KinematicController.MovePosition(player.Direction, player.WalkSpeed);
+        // Use ICharacterController directly if available
+        if (player.CharacterController != null)
+        {
+            player.CharacterController.SetVelocity(player.Direction * player.WalkSpeed);
+        }
+        else
+        {
+            player.SetControllerVelocity(player.Direction * player.WalkSpeed);
+        }
     }
 }
