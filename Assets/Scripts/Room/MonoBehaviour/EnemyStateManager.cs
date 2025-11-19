@@ -3,6 +3,12 @@
 [RequireComponent(typeof(Collider2D))]
 public class EnemyStateManager : EntityStateManager
 {
+    [Header("Data")]
+    public EnemyData enemyData;
+
+    // Cached health component (optional)
+    private EnemyHealth _enemyHealth;
+
     private EnemyIdleState _idleState;
     private EnemyWalkState _walkState;
     private EnemyKnockedState _knockedState;
@@ -21,11 +27,18 @@ public class EnemyStateManager : EntityStateManager
         _knockedState = new EnemyKnockedState(this);
 
         _direction = Vector2.down;
-        
+
     }
     protected override void Start()
     {
         base.Start();
+        // Initialize health from data if available
+        _enemyHealth = GetComponent<EnemyHealth>();
+        if (_enemyHealth != null && enemyData != null)
+        {
+            _enemyHealth.Initialize(enemyData.maxHealth);
+        }
+
         TransitionToState(_walkState);
     }
 

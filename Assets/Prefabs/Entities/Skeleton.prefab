@@ -97,6 +97,7 @@ GameObject:
   - component: {fileID: 2486148207068956495}
   - component: {fileID: 9048217342962173295}
   - component: {fileID: 3941391767768453455}
+  - component: {fileID: 3934159539937554855}
   m_Layer: 12
   m_Name: Skeleton
   m_TagString: Enemy
@@ -245,8 +246,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkSpeed: 3
+  enemyData: {fileID: 11400000, guid: f58e378f534f8604c932841f7db710a7, type: 2}
   ThrustForce: 13
-  isHit: 1
 --- !u!114 &3941391767768453455
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -276,6 +277,21 @@ MonoBehaviour:
     minNormalAngle: 0
     maxNormalAngle: 0
   m_Movement: {x: 0, y: 0}
+  m_DefaultSpeed: 3
+--- !u!114 &3934159539937554855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3934735097026660753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dca5a23545ddc948b5e7cc2e88124ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 30
+  currentHealth: -1
 --- !u!1 &4112702470522050436
 GameObject:
   m_ObjectHideFlags: 0

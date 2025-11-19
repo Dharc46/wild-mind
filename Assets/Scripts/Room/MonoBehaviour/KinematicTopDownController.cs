@@ -7,17 +7,6 @@ using UnityEngine;
 /// Multiple iterations of a query are used with movement clamping that allows "sliding" along surfaces.
 /// </summary>
 
-// Local definition of ICharacterController to ensure compile-time availability.
-// Kept here to avoid assembly/compile-order issues in the project. This matches the
-// separate interface used by states and adapters.
-public interface ICharacterController
-{
-    void MoveTo(Vector2 worldTarget);
-    void SetVelocity(Vector2 velocity);
-    void Stop();
-    bool IsMoving { get; }
-}
-
 public class KinematicTopDownController : MonoBehaviour, ICharacterController
 {
 
