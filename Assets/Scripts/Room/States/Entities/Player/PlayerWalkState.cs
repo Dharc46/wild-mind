@@ -2,7 +2,12 @@
 
 public class PlayerWalkState : PlayerBaseState
 {
-    public PlayerWalkState(EntityStateManager entity) : base(entity) { }
+    private readonly ICharacterController _controller;
+
+    public PlayerWalkState(EntityStateManager entity) : base(entity)
+    {
+        _controller = player.GetComponent<ICharacterController>();
+    }
 
     public override void EnterState()
     {
@@ -46,8 +51,12 @@ public class PlayerWalkState : PlayerBaseState
 
     public override void FixedUpdate()
     {
-        // Use ICharacterController directly if available
-        if (player.CharacterController != null)
+        // Use ICharacterController if available (cached); fallback to state manager wrapper
+        if (_controller != null)
+        {
+            _controller.SetVelocity(player.Direction * player.WalkSpeed);
+        }
+        else if (player.CharacterController != null)
         {
             player.CharacterController.SetVelocity(player.Direction * player.WalkSpeed);
         }

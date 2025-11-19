@@ -9,7 +9,12 @@ public class EnemyWalkState : EnemyBaseState
 
     private readonly Vector2[] _directions = { Vector2.left, Vector2.up, Vector2.right, Vector2.down };
 
-    public EnemyWalkState(EnemyStateManager entity) : base(entity) { }
+    private readonly ICharacterController _controller;
+
+    public EnemyWalkState(EnemyStateManager entity) : base(entity)
+    {
+        _controller = enemy.GetComponent<ICharacterController>();
+    }
 
     public override void EnterState()
     {
@@ -56,8 +61,12 @@ public class EnemyWalkState : EnemyBaseState
     public override void FixedUpdate()
     {
         UpdateAnimation();
-        // Prefer ICharacterController if available so states depend on the interface
-        if (enemy.CharacterController != null)
+        // Prefer cached ICharacterController if available so states depend on the interface
+        if (_controller != null)
+        {
+            _bumped = _controller.MovePosition(enemy.Direction, enemy.WalkSpeed);
+        }
+        else if (enemy.CharacterController != null)
         {
             _bumped = enemy.CharacterController.MovePosition(enemy.Direction, enemy.WalkSpeed);
         }
