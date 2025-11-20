@@ -31,6 +31,7 @@ public class EnemyRangedState : EnemyBaseState
         CacheRangeWindow();
         enemy.Animator.SetBool("IsWalking", false);
         AcquirePlayer(true);
+        Debug.Log("GHOST ĐÃ VÀO RangedAttackState", enemy);
     }
 
     public override void Update()
@@ -155,11 +156,31 @@ public class EnemyRangedState : EnemyBaseState
             direction.Normalize();
         }
 
+        Vector3 enemyPos = enemy.transform.position;
         Vector3 spawnPos = enemy.projectileSpawnPoint != null
             ? enemy.projectileSpawnPoint.position
+            : enemyPos;
+        Vector3 playerPos = _player != null
+            ? _player.transform.position
             : enemy.transform.position;
 
+        if (spawnPos.sqrMagnitude < 1f)
+        {
+            Vector3 dir = (playerPos - enemyPos).normalized;
+            spawnPos = enemyPos + dir * 0.6f;
+        }
+
+        Debug.Log($"[GHOST DEBUG] ENEMY: {enemyPos} | SPAWN: {spawnPos} | PLAYER: {playerPos} | DELTA: {Vector3.Distance(spawnPos, playerPos):F1}m");
+        Debug.Log($"[GHOST DEBUG] SPAWN POINT NULL? {enemy.projectileSpawnPoint == null}", enemy.gameObject);
+
         GameObject projectile = Object.Instantiate(enemy.projectilePrefab, spawnPos, Quaternion.identity);
+
+        var projectileBehaviour = projectile.GetComponent<EnemyProjectile>();
+        if (projectileBehaviour != null)
+        {
+            float damage = enemy.enemyData != null ? enemy.enemyData.damage : 0f;
+            projectileBehaviour.Initialize(enemy, damage);
+        }
 
         float speed = Mathf.Max(0.1f, enemy.projectileSpeed);
         Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();

@@ -36,8 +36,8 @@ public class PlayerStateManager : EntityStateManager
         TransitionToState(ShiftState);
     }
 
-    public void TakeDamage()
+    public void TakeDamage(float amount)
     {
-        Debug.Log("player hit by NPC");
+        Debug.Log($"player hit by NPC for {amount} damage");
     }
 }
