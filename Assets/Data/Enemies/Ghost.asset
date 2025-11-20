@@ -15,17 +15,18 @@ MonoBehaviour:
   enemyID: 
   enemyName: 
   sprite: {fileID: 0}
-  maxHealth: 30
-  damage: 5
+  maxHealth: 125
+  damage: 8
   attackSpeed: 1
-  movementSpeed: 3
-  detectionRadius: 8
-  attackRange: 1
-  isRanged: 0
-  fleeHealthThreshold: 0.25
+  movementSpeed: 3.5
+  detectionRadius: 10
+  attackRange: 7
+  isRanged: 1
+  fleeHealthThreshold: 0.2
   outOfCombatHealDelay: 3
-  healPerSecond: 5
-  preferredAttackRange: 6
-  minimumSafeDistance: 3
-  coverSearchRadius: 10
+  healPerSecond: 2
+  healStopFraction: 1
+  preferredAttackRange: 6.5
+  minimumSafeDistance: 3.5
+  coverSearchRadius: 6
   notes: 

@@ -28,7 +28,20 @@ public class PlayerSwingSwordState : PlayerBaseState
         if (collision.CompareTag("Enemy"))
         {
             // The HurtBox collider will be involved as it's the only set to trigger
-            collision.GetComponent<EnemyStateManager>().Hit(player.Direction);
+            var enemyManager = collision.GetComponent<EnemyStateManager>();
+            if (enemyManager != null)
+            {
+                enemyManager.Hit(player.Direction);
+
+                if (player.swordDamage > 0f)
+                {
+                    var enemyHealth = collision.GetComponent<EnemyHealth>();
+                    if (enemyHealth != null)
+                    {
+                        enemyHealth.TakeDamage(player.swordDamage);
+                    }
+                }
+            }
         }
     }
 }

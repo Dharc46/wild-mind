@@ -2,6 +2,10 @@
 
 public class PlayerStateManager : EntityStateManager
 {
+    [Header("Combat")]
+    [Tooltip("Damage dealt by the sword swing state per hit.")]
+    public float swordDamage = 5f;
+
     private PlayerIdleState _idleState;
     private PlayerWalkState _walkState;
     private PlayerShiftState _shiftState;

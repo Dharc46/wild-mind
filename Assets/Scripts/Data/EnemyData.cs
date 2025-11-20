@@ -33,6 +33,8 @@ public class EnemyData : ScriptableObject
 
     [Tooltip("Health points regained per second while healing out of combat.")]
     public float healPerSecond = 5f;
+    [Range(0f, 1f), Tooltip("Fraction of max HP to heal up to when out of combat (1 = full).")]
+    public float healStopFraction = 1f;
 
     [Tooltip("Preferred attack distance for ranged enemies (world units).")]
     public float preferredAttackRange = 6f;

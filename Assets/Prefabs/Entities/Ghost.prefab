@@ -187,7 +187,7 @@ Animator:
   m_GameObject: {fileID: 2433225451650072507}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 22100000, guid: 72f1fc286d686964182d703248041229, type: 2}
+  m_Controller: {fileID: 22100000, guid: 53464f14d1fc6e349b48234fd12a72e0, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -247,6 +247,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 3
   enemyData: {fileID: 11400000, guid: 2a936061d0292bc4a92c477085d954f4, type: 2}
+  projectilePrefab: {fileID: 0}
+  projectileSpawnPoint: {fileID: 0}
+  projectileSpeed: 10
+  projectileLifetime: 6
+  rangedFireCooldown: 1.25
+  projectileSpreadDegrees: 0
+  coverObstructionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  combatExitDelay: 5
   ThrustForce: 13
 --- !u!114 &2444561789958956901
 MonoBehaviour:
