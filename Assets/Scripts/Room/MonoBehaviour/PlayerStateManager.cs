@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+[RequireComponent(typeof(PlayerHealth))]
 public class PlayerStateManager : EntityStateManager
 {
     [Header("Combat")]
@@ -10,14 +11,21 @@ public class PlayerStateManager : EntityStateManager
     private PlayerWalkState _walkState;
     private PlayerShiftState _shiftState;
     private PlayerSwingSwordState _swingSwordState;
+    [SerializeField]
+    private PlayerHealth _playerHealth;
 
     public PlayerIdleState IdleState { get => _idleState; }
     public PlayerWalkState WalkState { get => _walkState; }
     public PlayerShiftState ShiftState { get => _shiftState; }
     public PlayerSwingSwordState SwingSwordState { get => _swingSwordState; }
+    public PlayerHealth PlayerHealth => _playerHealth;
 
     private void Awake()
     {
+        if (_playerHealth == null)
+        {
+            _playerHealth = GetComponent<PlayerHealth>();
+        }
         _idleState = new PlayerIdleState(this);
         _walkState = new PlayerWalkState(this);
         _shiftState = new PlayerShiftState(this);
@@ -38,6 +46,12 @@ public class PlayerStateManager : EntityStateManager
 
     public void TakeDamage(float amount)
     {
-        Debug.Log($"player hit by NPC for {amount} damage");
+        if (_playerHealth == null)
+        {
+            Debug.LogWarning("PlayerHealth component missing. Cannot apply damage.", this);
+            return;
+        }
+
+        _playerHealth.TakeDamage(amount);
     }
 }

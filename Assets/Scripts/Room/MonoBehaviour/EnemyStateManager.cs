@@ -21,6 +21,12 @@ public class EnemyStateManager : EntityStateManager
     [Tooltip("Random spread applied to projectile direction in degrees.")]
     public float projectileSpreadDegrees = 0f;
 
+    [Header("Detection")]
+    [Tooltip("Seconds between automatic player proximity checks.")]
+    public float detectionCheckInterval = 0.25f;
+    [Tooltip("How far (as a multiplier of detection radius) the player can move away before combat naturally times out.")]
+    public float detectionLoseMultiplier = 1.5f;
+
     [Header("Cover & Flee")]
     [Tooltip("Layers considered solid for cover checks when fleeing.")]
     public LayerMask coverObstructionMask = ~0;
@@ -35,6 +41,8 @@ public class EnemyStateManager : EntityStateManager
     private EnemyHealState _healState;
     private EnemyFleeState _fleeState;
     private Vector2 _hitDir;
+    private PlayerStateManager _player;
+    private float _detectionTimer;
 
     [Header("Combat Logic")]
     [Tooltip("Seconds to remain flagged in-combat after last detection/damage event.")]
@@ -50,6 +58,18 @@ public class EnemyStateManager : EntityStateManager
     public EnemyHealState HealState { get => _healState; }
     public EnemyFleeState FleeState { get => _fleeState; }
     public bool IsInCombat => _isInCombat;
+    public PlayerStateManager PlayerTarget
+    {
+        get
+        {
+            if (_player == null)
+            {
+                _player = FindObjectOfType<PlayerStateManager>();
+            }
+
+            return _player;
+        }
+    }
 
     public Vector2 HitDirection { get => _hitDir; }
     public float ThrustForce = 13.0f;
@@ -93,6 +113,7 @@ public class EnemyStateManager : EntityStateManager
     protected override void Update()
     {
         base.Update();
+        UpdatePlayerAwareness();
         EvaluateStateTransitions();
     }
 
@@ -203,6 +224,31 @@ public class EnemyStateManager : EntityStateManager
             StopCoroutine(_combatTimerRoutine);
         }
         _combatTimerRoutine = StartCoroutine(CombatTimeoutRoutine());
+    }
+
+    private void UpdatePlayerAwareness()
+    {
+        if (enemyData == null)
+            return;
+
+        _detectionTimer -= Time.deltaTime;
+        if (_detectionTimer > 0f)
+            return;
+
+        _detectionTimer = Mathf.Max(0.05f, detectionCheckInterval);
+
+        var player = PlayerTarget;
+        if (player == null)
+            return;
+
+        Vector2 delta = player.transform.position - transform.position;
+        float distance = delta.magnitude;
+        float detectionRadius = Mathf.Max(0.5f, enemyData.detectionRadius);
+
+        if (distance <= detectionRadius)
+        {
+            BeginCombatWindow();
+        }
     }
 
     private IEnumerator CombatTimeoutRoutine()
