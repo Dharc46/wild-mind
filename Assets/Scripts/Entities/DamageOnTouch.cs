@@ -17,10 +17,17 @@ public class DamageOnTouch : MonoBehaviour
             return;
 
         var health = collision.GetComponent<PlayerHealth>();
-        if (health == null)
-            return;
+        if (health != null)
+        {
+            health.TakeDamage(damage);
+        }
 
-        health.TakeDamage(damage);
         lastDamageTime = Time.time;
+
+        var enemyState = GetComponentInParent<EnemyStateManager>();
+        if (enemyState != null && enemyState.enemyData != null && !enemyState.enemyData.isRanged)
+        {
+            enemyState.NotifyPlayerDamaged(damage, false);
+        }
     }
 }

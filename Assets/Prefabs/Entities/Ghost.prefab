@@ -257,6 +257,8 @@ MonoBehaviour:
   projectileLifetime: 6
   rangedFireCooldown: 1.25
   projectileSpreadDegrees: 0
+  detectionCheckInterval: 0.25
+  detectionLoseMultiplier: 1.5
   coverObstructionMask:
     serializedVersion: 2
     m_Bits: 4294967295

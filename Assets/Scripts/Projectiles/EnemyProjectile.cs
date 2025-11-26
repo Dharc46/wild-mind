@@ -62,7 +62,19 @@ public class EnemyProjectile : MonoBehaviour
             return;
 
         _hasHit = true;
+        float previousHealth = player.PlayerHealth != null ? player.PlayerHealth.CurrentHealth : 0f;
         player.TakeDamage(damage);
+
+        bool killed = player.PlayerHealth != null && !player.PlayerHealth.IsAlive;
+        float appliedDamage = player.PlayerHealth != null
+            ? Mathf.Max(0f, previousHealth - player.PlayerHealth.CurrentHealth)
+            : damage;
+
+        if (owner != null && appliedDamage > 0f)
+        {
+            owner.NotifyPlayerDamaged(appliedDamage, killed);
+        }
+
         Destroy(gameObject);
     }
 }

@@ -14,6 +14,14 @@ static class Const
 
     public const int MapRenderOffsetX = (ScreenWitdth - MapWitdth) / 2;
     public const int MapRenderOffsetY = (ScreenHeight - MapHeight) / 2;
+
+    public static Vector2 GetRandomPosition(int roomOffsetX, int roomOffsetY)
+    {
+        int x = Random.Range(2, MapWitdth - 2);
+        int y = Random.Range(2, MapHeight - 2);
+
+        return new Vector2(x + roomOffsetX, y + roomOffsetY);
+    }
 }
 
 // Offset the GameObject's position the script is attached to, by half the room size

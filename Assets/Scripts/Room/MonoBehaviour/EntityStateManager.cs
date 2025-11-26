@@ -66,11 +66,17 @@ public abstract class EntityStateManager : MonoBehaviour
 
     protected virtual void Update()
     {
+        if (_currentState == null)
+            return;
+
         _currentState.Update();
     }
 
     protected virtual void FixedUpdate()
     {
+        if (_currentState == null)
+            return;
+
         _currentState.FixedUpdate();
     }
 
@@ -82,16 +88,25 @@ public abstract class EntityStateManager : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if (_currentState == null)
+            return;
+
         _currentState.OnCollisionEnter2D(collision);
     }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
+        if (_currentState == null)
+            return;
+
         _currentState.OnCollisionExit2D(collision);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (_currentState == null)
+            return;
+
         _currentState.OnTriggerEnter2D(collision);
     }
 }

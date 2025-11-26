@@ -61,6 +61,12 @@ public class DungeonManager : Singleton<DungeonManager>
     {
         DontDestroyOnLoad(gameObject);
 
+        transform.position = Vector3.zero;
+        if (_dungeonHolder != null)
+        {
+            _dungeonHolder.position = Vector3.zero;
+        }
+
         Doorway.ShiftRoomEvent += PlayerCollideDoorwayEventHandler;
         Switch.SwitchPressed += SwitchPressedEventHandler;
 

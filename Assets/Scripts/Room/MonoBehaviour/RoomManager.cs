@@ -31,6 +31,10 @@ public class RoomManager : MonoBehaviour
 
     public List<Doorway> DoorwayPrefabs;
     public GameObject switchPrefab;
+    public GameObject obstaclePrefab;
+    [SerializeField, Min(0)] private int obstacleCount = 3;
+    [Header("Training Settings")]
+    public bool isTrainingScene = false;
     public GameObject[] enemyPrefabs;
 
     // A list of possible locations to place tiles.
@@ -56,6 +60,7 @@ public class RoomManager : MonoBehaviour
         GenerateWallsAndFloors();
         GenerateDoorways();
         GenerateObjects();
+        GenerateObstacles();
         GenerateEntities();
 
         return room;
@@ -63,20 +68,40 @@ public class RoomManager : MonoBehaviour
 
     private void GenerateObjects()
     {
-        Vector2 randPos = GetRandomPosition(_adjacentOffsetX, _adjacentOffsetY);
+        Vector2 randPos = isTrainingScene
+            ? GetRandomPositionInCenteredRoom()
+            : Const.GetRandomPosition(_adjacentOffsetX, _adjacentOffsetY);
         switchInstance = Instantiate(switchPrefab, randPos, Quaternion.identity);
         switchInstance.transform.SetParent(room.Holder);
         room.Switch = switchInstance;
     }
 
-    // TOOD: Move to another class with all the Screen and camera stuff.
-    public static Vector2 GetRandomPosition(int offsetX, int offsetY)
+    private void GenerateObstacles()
     {
-        // + 2 is the offset for the walls and one extra so it isn't either next to the walls
-        float targetHorizontalPos = Random.Range(Const.MapRenderOffsetX + 2 , Const.MapWitdth - 1);
-        float targetVerticalPos = Random.Range(Const.MapRenderOffsetY + 2, Const.MapHeight - 1);
+        if (isTrainingScene)
+        {
+            return;
+        }
 
-        return new Vector2(targetHorizontalPos + offsetX, targetVerticalPos + offsetY);
+        if (obstaclePrefab == null || obstacleCount <= 0)
+        {
+            return;
+        }
+
+        for (int i = 0; i < obstacleCount; i++)
+        {
+            Vector2 randPos = isTrainingScene
+                ? GetRandomPositionInCenteredRoom()
+                : Const.GetRandomPosition(_adjacentOffsetX, _adjacentOffsetY);
+            var obstacle = Instantiate(obstaclePrefab, randPos, Quaternion.identity, room.Holder);
+            Debug.Log($"Spawn obstacle tại: {randPos} | Offset: ({_adjacentOffsetX}, {_adjacentOffsetY})");
+        }
+    }
+
+    // TODO: Move to another class with all the Screen and camera stuff.
+    public static Vector2 GetRandomPositionInCenteredRoom()
+    {
+        return Const.GetRandomPosition(0, 0);
     }
 
     // Generate the walls and floor of the room, randomazing the various varieties
@@ -156,10 +181,11 @@ public class RoomManager : MonoBehaviour
     {
         foreach (var enemy in enemyPrefabs)
         {
-            Vector2 randPos = GetRandomPosition(_adjacentOffsetX, _adjacentOffsetY);
+            Vector2 randPos = isTrainingScene
+                ? GetRandomPositionInCenteredRoom()
+                : Const.GetRandomPosition(_adjacentOffsetX, _adjacentOffsetY);
             GameObject enemiInstance = Instantiate(enemy, randPos, Quaternion.identity);
             enemiInstance.transform.SetParent(room.Holder);
         }
     }
 }
-
